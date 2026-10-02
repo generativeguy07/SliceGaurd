@@ -1,0 +1,49 @@
+# All values are ASSUMED model parameters for a simulation. Tune them and record changes in docs/ASSUMPTIONS.md.
+seed: 42
+time:
+  tick_seconds: 1
+  run_length_ticks: 600
+  event_start_tick: 200
+  event_duration_ticks: 250
+
+slices:
+  embb:  {alloc_pct: 60, min_pct: 20, base_demand_pct: 27, base_latency_ms: 20}
+  urllc: {alloc_pct: 25, min_pct: 25, max_pct: 50, base_demand_pct: 9,  base_latency_ms: 5}
+  mmtc:  {alloc_pct: 15, min_pct: 10, base_demand_pct: 5,  base_latency_ms: 30, base_devices: 8000}
+
+sla:
+  urllc_max_latency_ms: 10
+  urllc_max_loss_pct: 1.0
+  embb_min_throughput_fraction: 0.5   # of its normal served load, proxy for acceptable degradation
+
+interference:
+  threshold_pct: 45        # eMBB served load (as % of total capacity) above which URLLC is affected
+  width_pct: 15
+  gamma: 0.5               # strength of cross-slice interference on URLLC effective load
+
+noise:
+  multiplicative_std: 0.04
+  missing_reading_prob: 0.01
+
+detector:
+  window: 10
+  n_estimators: 200
+  target_false_alarm_rate: 0.01
+  persistence_k: 3         # anomaly must hold in k of the last n ticks
+  persistence_n: 5
+
+diagnosis:
+  abstain_confidence_threshold: 0.60
+  evidence_window_ticks: 30
+
+validator:
+  max_change_per_action_pct: 15
+  total_pct: 100
+
+controller:
+  action_step_pct: 5       # candidate protect_urllc deltas: 5, 10, 15
+  cooldown_ticks: 20
+
+evaluation:
+  n_seeds: 30
+  scenarios: [embb_surge, ddos_like, infra_bottleneck, flash_crowd, overlapping, noisy_kpis, unseen_mmtc_storm]

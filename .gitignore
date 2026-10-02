@@ -1,0 +1,29 @@
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Python cache & build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Testing & IDE
+.pytest_cache/
+.coverage
+htmlcov/
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Keep results and figures
+!results/
+!results/*.csv
+!results/figures/
+!results/figures/*.png
+!results/.gitkeep
