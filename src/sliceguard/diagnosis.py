@@ -110,10 +110,17 @@ class DiagnosisEngine:
 
         # Take the most recent window of ticks
         recent = history[-self.window_ticks:]
-        if isinstance(recent[0], KPIRow):
-            raw_dicts = [r.to_observable_dict() for r in recent]
-        else:
-            raw_dicts = [{k: v for k, v in r.items() if k not in Simulator.GROUND_TRUTH_COLUMNS} for r in recent]
+        raw_dicts = []
+        for r in recent:
+            if hasattr(r, "to_observable_dict"):
+                raw_dicts.append(r.to_observable_dict())
+            elif hasattr(r, "items"):
+                raw_dicts.append({k: v for k, v in r.items() if k not in Simulator.GROUND_TRUTH_COLUMNS})
+            elif isinstance(r, dict):
+                raw_dicts.append({k: v for k, v in r.items() if k not in Simulator.GROUND_TRUTH_COLUMNS})
+            else:
+                d = dict(r)
+                raw_dicts.append({k: v for k, v in d.items() if k not in Simulator.GROUND_TRUTH_COLUMNS})
 
         df = pd.DataFrame(raw_dicts)
 

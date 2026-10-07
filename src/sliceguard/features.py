@@ -91,10 +91,17 @@ class FeatureExtractor:
         if not history:
             return pd.DataFrame(columns=self.get_feature_names())
 
-        if isinstance(history[0], KPIRow):
-            raw_data = [r.to_observable_dict() for r in history]
-        else:
-            raw_data = [{k: v for k, v in r.items() if k not in Simulator.GROUND_TRUTH_COLUMNS} for r in history]
+        raw_data = []
+        for r in history:
+            if hasattr(r, "to_observable_dict"):
+                raw_data.append(r.to_observable_dict())
+            elif hasattr(r, "items"):
+                raw_data.append({k: v for k, v in r.items() if k not in Simulator.GROUND_TRUTH_COLUMNS})
+            elif isinstance(r, dict):
+                raw_data.append({k: v for k, v in r.items() if k not in Simulator.GROUND_TRUTH_COLUMNS})
+            else:
+                d = dict(r)
+                raw_data.append({k: v for k, v in d.items() if k not in Simulator.GROUND_TRUTH_COLUMNS})
 
         df = pd.DataFrame(raw_data)
         return self.extract_features_df(df)

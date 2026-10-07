@@ -54,6 +54,18 @@ class KPIRow:
         d.pop("is_attack", None)
         return d
 
+    def __getitem__(self, key: str) -> Any:
+        return getattr(self, key)
+
+    def items(self):
+        return self.to_dict().items()
+
+    def keys(self):
+        return self.to_dict().keys()
+
+    def values(self):
+        return self.to_dict().values()
+
 
 class Simulator:
     """Simulates a 3-slice 5G network per-second telemetry stream with closed-loop action support."""
