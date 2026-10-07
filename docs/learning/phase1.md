@@ -10,7 +10,7 @@ In this phase, we built a mathematical **three-slice 5G network simulator** and 
 
 The simulator generates per-second telemetry data (latency, packet loss, throughput, CPU utilization, jitter) for three 5G slices sharing a common pool of radio and compute capacity. Crucially, when video downloads (eMBB) surge, the shared buffers and scheduler get clogged, which causes high-priority emergency packets (URLLC) to experience dangerous delays and packet loss (cross-slice interference). We also built the ability to apply corrective actions (like reallocating bandwidth or rate-limiting) mid-simulation to see how the network recovers.
 
-### 🚗 Everyday Analogy: The 3-Lane Highway
+### Everyday Analogy: The 3-Lane Highway
 Imagine a 3-lane highway:
 1. **Lane 1 (eMBB)**: A freight lane for heavy cargo trucks (video streams).
 2. **Lane 2 (URLLC)**: An emergency lane reserved for ambulances and fire trucks (critical low-latency data).

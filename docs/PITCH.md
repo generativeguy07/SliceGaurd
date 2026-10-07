@@ -5,7 +5,7 @@
 
 ---
 
-## 🎯 Part 1: Slide Presentation Outline (6 Slides)
+## Part 1: Slide Presentation Outline (6 Slides)
 
 ### Slide 1: The Problem — When Critical Slices Collide
 - **Visual**: A split screen showing an ambulance emergency telemetry feed alongside a user streaming 4K video.
@@ -64,7 +64,7 @@
 
 ---
 
-## ⏱️ Part 2: Word-for-Word 2-Minute Live Demo Script
+## Part 2: Word-for-Word 2-Minute Live Demo Script
 
 **Setup**: Open terminal and run `streamlit run src/sliceguard/app.py`. Open browser to `http://localhost:8501`.
 
@@ -79,7 +79,7 @@ Under normal traffic, our URLLC latency rests safely at 6.0 ms, well below our 1
 "Now, let's switch to a passive network baseline (B1) and inject an eMBB bandwidth surge at tick 200.
 Watch what happens: video downloads jump to 70%, buffers get clogged, and cross-slice interference causes URLLC latency to skyrocket to 30 ms!
 Because B1 has no automation, the emergency slice stays in severe SLA violation for the entire 250-second incident."
-[Action: Select 'B1_no_action', click '⚠️ Inject eMBB Surge', advance with '+50s' to tick 250.]
+[Action: Select 'B1_no_action', click 'Inject eMBB Surge', advance with '+50s' to tick 250.]
 
 [0:50 - 1:20] AUTONOMOUS RECOVERY WITH B4 & TWIN PRE-CHECK
 "Now let's switch to SliceGuard-Lite's B4 Safety Loop and inject the exact same surge.
@@ -88,18 +88,18 @@ Notice what happens:
 2. Our explainable diagnosis engine identifies 'cross_slice_contention' with 100% confidence.
 3. Crucially, look at the Digital Twin Pre-Check panel: it tests a candidate +5% shift, predicts that latency would remain at 12.16 ms (violating the SLA), and REJECTS it. It then tests a +10% shift, predicts 7.27 ms latency, and ACCEPTS it!
 4. It shifts URLLC allocation to 35%, and latency instantly recovers to 6.6 ms. The SLA is saved!"
-[Action: Select 'B4_full', click '⚠️ Inject eMBB Surge', advance to tick 250.]
+[Action: Select 'B4_full', click 'Inject eMBB Surge', advance to tick 250.]
 
 [1:20 - 1:40] FLASH CROWD DISTINCTION (NO HARMFUL ACTIONS)
 "Next, what happens during a legitimate Flash Crowd?
 A dumb system might mistake high traffic for a DDoS attack and block legitimate users.
 SliceGuard-Lite inspects the packet pattern anomaly ratio, diagnoses 'traffic_overload' with 98.9% confidence, and applies mild rate limiting rather than destructive isolation."
-[Action: Click '🔵 Inject Flash Crowd', advance to tick 300.]
+[Action: Click 'Inject Flash Crowd', advance to tick 300.]
 
 [1:40 - 2:00] ZERO-DAY ANOMALY & SAFETY ABSTENTION
 "Finally, what happens when an unseen zero-day event hits, like an unmodeled IoT registration storm?
 Watch the red banner: the detector spots the spike, but because no known rule matches, our system refuses to guess.
 It ABSTAINS and immediately escalates to human operators with an auditable telemetry log.
 That is the essence of SliceGuard-Lite: AI that proves an action is safe before it acts. Thank you!"
-[Action: Click '🟣 Inject Unknown IoT Storm', advance to tick 250.]
+[Action: Click 'Inject Unknown IoT Storm', advance to tick 250.]
 ```

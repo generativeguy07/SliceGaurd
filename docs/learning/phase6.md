@@ -12,7 +12,7 @@ In this final phase, we transformed our code and empirical benchmark into a **co
 3. **[docs/QA.md](file:///home/maurya/Downloads/sliceguard-antigravity/docs/QA.md)**: A comprehensive defense guide addressing the 6 toughest questions a telecom judge or hackathon reviewer could ask.
 4. **[docs/ASSUMPTIONS.md](file:///home/maurya/Downloads/sliceguard-antigravity/docs/ASSUMPTIONS.md)** & **[docs/LIMITATIONS.md](file:///home/maurya/Downloads/sliceguard-antigravity/docs/LIMITATIONS.md)**: Fully transparent engineering disclosures detailing mathematical equations, parameter choices, and empirical tradeoffs.
 
-### 🏆 Everyday Analogy: The Completed Skyscraper & Safety Inspection
+### Everyday Analogy: The Completed Skyscraper & Safety Inspection
 Imagine building a high-tech skyscraper:
 - Phases 1 to 3 were the foundation, structural steel, and automated emergency sprinkler system.
 - Phase 4 was the stress-test tournament: simulating earthquakes, high winds, and electrical blackouts.
@@ -74,4 +74,4 @@ Imagine building a high-tech skyscraper:
 - [x] Telecom judge Q&A defense memorized in [docs/QA.md](file:///home/maurya/Downloads/sliceguard-antigravity/docs/QA.md).
 - [x] Honest limitations documented in [docs/LIMITATIONS.md](file:///home/maurya/Downloads/sliceguard-antigravity/docs/LIMITATIONS.md).
 
-**Congratulations! You are 100% ready to present and defend SliceGuard-Lite with confidence!** 🚀
+**Congratulations! You are 100% ready to present and defend SliceGuard-Lite with confidence!**

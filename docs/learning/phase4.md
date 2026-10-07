@@ -14,7 +14,7 @@ We benchmark four controllers:
 - **B3 (Detector + Rules)**: AI anomaly detector and diagnosis, but without a digital twin and without abstention.
 - **B4 (Full Safety Loop)**: Our complete system (Detector + Diagnosis + Abstention + Policy Validator + Digital Twin Pre-Check).
 
-### 🥋 Everyday Analogy: The Martial Arts Tournament
+### Everyday Analogy: The Martial Arts Tournament
 Imagine 4 fighters facing unpredictable opponents (storms, ambushes, normal sparring):
 - **B1 (The Statue)**: Stands completely still and gets knocked out every time a strike comes.
 - **B2 (The Reflex Kicker)**: Immediately throws a blind high kick the instant anything moves. If it's a real punch, it blocks it instantly; but if it's a friendly teammate walking by, it kicks them too!

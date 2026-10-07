@@ -15,7 +15,7 @@ With this dashboard, you can:
 4. **Demonstrate Safety Abstention**: Inject an unseen mMTC storm and watch the system automatically abstain and escalate to human operators rather than taking destructive actions.
 5. **Explore Benchmark Results**: Browse multi-seed evaluation tables and charts comparing B1 through B4 across all 8 scenarios.
 
-### 🎮 Everyday Analogy: The Flight Simulator Cockpit
+### Everyday Analogy: The Flight Simulator Cockpit
 Imagine training a commercial airline pilot:
 - Instead of testing maneuvers on a real aircraft carrying passengers, you put the pilot in a **full-motion flight simulator cockpit**.
 - The flight instructor has an "event injection panel": they press a button to trigger wind shear or engine failure.
@@ -41,23 +41,23 @@ streamlit run src/sliceguard/app.py
 
 ### The 2-Minute Scripted Demonstration Flow:
 1. **Step 1: Normal Operation (0:00 - 0:20)**:
-   - Click **🟢 Normal Baseline**. Click **+50s** twice to advance to tick 100.
+   - Click **Normal Baseline**. Click **+50s** twice to advance to tick 100.
    - Point to the live gauges: URLLC latency is resting safely at $\approx 6\text{ ms}$, packet loss is $0.1\%$, and slice allocations are at default ($60\%$ eMBB, $25\%$ URLLC, $15\%$ mMTC).
 2. **Step 2: Inject eMBB Surge & Show Failure in B1 (0:20 - 0:50)**:
-   - Switch controller in sidebar to **B1 (No Action)**. Click **⚠️ Inject eMBB Surge**. Advance with **+50s** to tick 250.
+   - Switch controller in sidebar to **B1 (No Action)**. Click **Inject eMBB Surge**. Advance with **+50s** to tick 250.
    - Point to the red SLA violation: URLLC latency spikes to $\approx 31\text{ ms}$, breaching the $10\text{ ms}$ SLA!
 3. **Step 3: Enable B4 and Show Autonomous Recovery (0:50 - 1:20)**:
-   - Switch controller to **B4 (Full Safety Loop)** and click **⚠️ Inject eMBB Surge**. Advance with **+50s** to tick 250.
+   - Switch controller to **B4 (Full Safety Loop)** and click **Inject eMBB Surge**. Advance with **+50s** to tick 250.
    - Show the **Safety Pre-Check Panel**:
      - Diagnosis: `cross_slice_contention` ($100\%$ confidence).
      - Digital Twin Pre-Check: Candidate $+5\%$ rejected ($12.16\text{ ms} > 10\text{ ms}$); candidate $+10\%$ accepted ($7.27\text{ ms} \le 10\text{ ms}$).
      - Action Applied: URLLC allocation shifted to $35\%$.
      - Result: URLLC latency safely restored to $\approx 6.6\text{ ms}$!
 4. **Step 4: Demonstrate Flash Crowd Handling (1:20 - 1:40)**:
-   - Click **🔵 Inject Flash Crowd**. Advance to tick 300.
+   - Click **Inject Flash Crowd**. Advance to tick 300.
    - Point out that the system accurately diagnoses `traffic_overload` ($98.9\%$ confidence) and does NOT punish real users as if they were DDoS attackers.
 5. **Step 5: Demonstrate Safety Abstention (1:40 - 2:00)**:
-   - Click **🟣 Inject Unknown IoT Storm**. Advance to tick 250.
+   - Click **Inject Unknown IoT Storm**. Advance to tick 250.
    - Show the red **SAFETY ABSTENTION** banner: The system detects the registration failure spike, identifies the condition as `unknown`, and safely abstains and escalates to human engineers rather than making unverified changes.
 
 ---

@@ -30,7 +30,7 @@ In this phase, we completed the **autonomous safety loop** by building five inte
    - **B3**: Detector + Rules (no pre-check, no abstention).
    - **B4**: Full Safety-First Assurance (Detector + Diagnosis + Abstention + Validator + Digital Twin).
 
-### 🛫 Everyday Analogy: The Flight Simulator Pre-Check & Copilot
+### Everyday Analogy: The Flight Simulator Pre-Check & Copilot
 Imagine flying a commercial airliner in severe turbulence:
 - **B1 (No Action)**: The autopilot does nothing and lets the plane lose altitude.
 - **B2 (Static Rule)**: If altitude drops, yank the control stick up hard (might overstress the wings or stall the engines!).

@@ -8,7 +8,7 @@ SliceGuard-Lite is a simulation-based prototype of autonomous assurance for 5G n
 
 ---
 
-## 🌟 Key Architecture & Safety Principles
+## Key Architecture & Safety Principles
 
 ```mermaid
 flowchart TD
@@ -18,12 +18,12 @@ flowchart TD
 
     subgraph Intelligence & Safety Loop
         B -- Incident Detected --> C[Rule-Based Diagnosis Engine\nEvidence Evaluation & Confidence]
-        C -- Low Confidence < 60% or Unknown --> D[🛑 Safety Abstention\nEscalate to Human Operator]
+        C -- Low Confidence < 60% or Unknown --> D[Safety Abstention\nEscalate to Human Operator]
         C -- High Confidence --> E[Action Menu Candidates\nSmallest to Largest Step]
         
         E --> F[Policy Validator\nHard Limits: Sum=100%, Min Bounds]
         F -- Valid --> G[Digital Twin Pre-Check\nPredicts Latency & Loss]
-        G -- Predicted Safe <= 10ms --> H[✅ Apply Action to Simulator]
+        G -- Predicted Safe <= 10ms --> H[Apply Action to Simulator]
         G -- All Candidates Unsafe --> D
         F -- Invalid --> D
     end
@@ -43,7 +43,7 @@ flowchart TD
 
 ---
 
-## 📊 Benchmark Evaluation Results (30 Independent Seeds)
+## Benchmark Evaluation Results (30 Independent Seeds)
 
 Empirical multi-seed results comparing **B1** (No Action), **B2** (Static Threshold), **B3** (Detector + Rules), and **B4** (Full Safety Loop) from [results/summary.csv](file:///home/maurya/Downloads/sliceguard-antigravity/results/summary.csv):
 
@@ -68,7 +68,7 @@ Empirical multi-seed results comparing **B1** (No Action), **B2** (Static Thresh
 
 ---
 
-## 🚀 Quickstart & Setup
+## Quickstart & Setup
 
 ### Option A: Run with Docker (Recommended for Collaborators — No Setup Needed!)
 Your collaborator only needs Docker installed. They can run the entire system with one command:
@@ -119,7 +119,7 @@ streamlit run src/sliceguard/app.py
 
 ---
 
-## 📁 Repository Map
+## Repository Map
 
 ```
 sliceguard-antigravity/
@@ -155,7 +155,7 @@ sliceguard-antigravity/
 
 ---
 
-## ⚠️ Honest Engineering Disclaimers
+## Honest Engineering Disclaimers
 
 - **Simulation Only**: This project is an algorithmic simulation and proof-of-concept. It does not integrate with live operator hardware, Nokia NetAct, or Nokia AVA.
 - **Approximation Twin**: The Digital Twin is an ML regressor trained on perturbed data, not an exact copy of the simulator formulas.

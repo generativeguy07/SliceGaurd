@@ -20,7 +20,7 @@ In Phase 2, we built two essential intelligence layers that operate purely on ob
    - It computes a transparent confidence score based on satisfied evidence.
    - If two rules conflict or the confidence is below $60\%$ (or an unknown anomaly occurs, like the `unseen_mmtc_storm`), the system **abstains** and safely escalates to human engineers instead of guessing recklessly.
 
-### 🏥 Everyday Analogy: The Hospital Triage & Specialist
+### Everyday Analogy: The Hospital Triage & Specialist
 - **The Detector is the Vital Signs Monitor (Triage)**:
   - It watches heart rate, blood pressure, and temperature.
   - If readings drift outside normal ranges persistently, it sounds an alarm. It doesn't perform surgery or guess the disease; it simply alerts staff that something is wrong.
