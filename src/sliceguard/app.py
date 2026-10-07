@@ -272,15 +272,23 @@ def main() -> None:
 
         # 3. STATUS BANNER
         latest_dec = ctrl.latest_decision
-        if latest_dec and latest_dec.is_incident:
-            if latest_dec.abstained:
+        applied_dec = next((d for d in reversed(ctrl.decision_log) if d.action_applied), None)
+        abstained_dec = next((d for d in reversed(ctrl.decision_log) if d.abstained), None)
+
+        if is_breaching:
+            if latest_dec and latest_dec.abstained:
                 st.error(f"[SAFETY ABSTENTION ACTIVE - Tick {current_tick}s]: Diagnosis confidence below safety threshold or unmodeled anomaly signature ({latest_dec.diagnosis.cause if latest_dec.diagnosis else 'unknown'}). Escalated to human operator.")
-            elif latest_dec.action_applied:
+            elif latest_dec and latest_dec.action_applied:
                 st.success(f"[ACTION APPLIED - Tick {latest_dec.tick}s]: {latest_dec.proposed_action.action} ({latest_dec.proposed_action.params}) passed Policy Validation and Digital Twin Pre-Check. SLA Restored.")
+            elif abstained_dec and (current_tick - abstained_dec.tick <= 60):
+                st.error(f"[SAFETY ABSTENTION ACTIVE - Tick {abstained_dec.tick}s]: Escalated to human operator ({abstained_dec.diagnosis.cause if abstained_dec.diagnosis else 'unknown'}).")
             else:
-                st.warning(f"[INCIDENT DETECTED - Tick {current_tick}s]: Anomaly flagged. Cooldown or monitoring active.")
+                st.warning(f"[INCIDENT DETECTED - Tick {current_tick}s]: Anomaly flagged. Cooldown or evaluation active.")
         else:
-            st.info("[NORMAL OPERATION]: Telemetry within healthy SLA parameters.")
+            if applied_dec and (current_scenario != "normal") and (current_tick >= event_start):
+                st.success(f"[INCIDENT MITIGATED & SLA RESTORED - Action Applied at Tick {applied_dec.tick}s]: '{applied_dec.proposed_action.action}' passed Policy Validation and Digital Twin Pre-Check. Telemetry is healthy (Latency: {lat_val:.1f}ms <= 10.0ms, Loss: {loss_val:.2f}% <= 1.0%).")
+            else:
+                st.info("[NORMAL OPERATION]: Telemetry within healthy SLA parameters.")
 
         # 4. LIVE TELEMETRY CHARTS
         if history:
