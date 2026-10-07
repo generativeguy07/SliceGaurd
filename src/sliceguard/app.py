@@ -8,7 +8,7 @@ Runs fully offline with free Python libraries.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -74,7 +74,7 @@ def init_session_state(config: AppConfig) -> None:
         st.session_state.sim = Simulator(config=config, seed=config.seed)
 
     if "scenario" not in st.session_state:
-        st.session_state.scenario = "normal"
+        st.session_state.scenario = "embb_surge"
 
     if "controller_id" not in st.session_state:
         st.session_state.controller_id = "B4_full"
@@ -86,9 +86,13 @@ def init_session_state(config: AppConfig) -> None:
             twin=twin,
         )
 
+    # Automatically advance to tick 250 on initial load so the dashboard is immediately populated
+    if len(st.session_state.sim.history) == 0:
+        step_sim(250)
 
-def reset_simulation(scenario: str, controller_id: str, seed: int) -> None:
-    """Reset simulation with chosen scenario, controller, and seed."""
+
+def reset_simulation(scenario: str, controller_id: str, seed: int, start_ticks: int = 250) -> None:
+    """Reset simulation with chosen scenario, controller, seed, and optional initial fast-forward."""
     cfg = st.session_state.config
     det = st.session_state.detector
     twin = st.session_state.twin
@@ -109,6 +113,9 @@ def reset_simulation(scenario: str, controller_id: str, seed: int) -> None:
 
     st.session_state.controller = ctrl
 
+    if start_ticks > 0:
+        step_sim(start_ticks)
+
 
 def step_sim(n_steps: int = 1) -> None:
     """Advance simulation by n ticks."""
@@ -120,6 +127,14 @@ def step_sim(n_steps: int = 1) -> None:
             break
         action = ctrl.decide(sim.history)
         sim.step(action=action)
+
+
+def run_full_scenario() -> None:
+    """Fast-forward simulation through all 600 ticks."""
+    sim: Simulator = st.session_state.sim
+    remaining = sim.config.time.run_length_ticks - sim.current_tick
+    if remaining > 0:
+        step_sim(remaining)
 
 
 def main() -> None:
@@ -146,45 +161,53 @@ def main() -> None:
             "B4_full": "B4: Full Safety Loop (Twin + Abstain)",
             "B3_rules": "B3: Detector + Rules (No Twin)",
             "B2_static": "B2: Static Threshold (Reactive)",
-            "B1_no_action": "B1: No Action (Passive)",
+            "B1_no_action": "B1: No Action (Passive Baseline)",
         }
         chosen_ctrl = st.selectbox(
             "Select Controller",
             options=list(controller_options.keys()),
             format_func=lambda k: controller_options[k],
-            index=0,
+            index=list(controller_options.keys()).index(st.session_state.controller_id),
         )
 
-        st.subheader("⚡ Event Injection")
+        # If user changed controller, reset and apply
+        if chosen_ctrl != st.session_state.controller_id:
+            reset_simulation(st.session_state.scenario, chosen_ctrl, selected_seed, start_ticks=st.session_state.sim.current_tick or 250)
+            st.rerun()
+
+        st.subheader("⚡ Event Injection (Click to Inject & Jump to Event)")
         scenario_buttons = {
-            "normal": ("🟢 Normal Baseline", "normal"),
-            "embb_surge": ("⚠️ Inject eMBB Surge", "embb_surge"),
-            "ddos_like": ("🔴 Inject DDoS Attack", "ddos_like"),
-            "infra_bottleneck": ("🟠 Inject Hardware Fault", "infra_bottleneck"),
-            "flash_crowd": ("🔵 Inject Flash Crowd", "flash_crowd"),
-            "unseen_mmtc_storm": ("🟣 Inject Unknown IoT Storm", "unseen_mmtc_storm"),
+            "embb_surge": ("⚠️ Inject eMBB Surge (Contention)", "embb_surge", 250),
+            "ddos_like": ("🔴 Inject DDoS Attack (Security)", "ddos_like", 250),
+            "infra_bottleneck": ("🟠 Inject Hardware Fault (Infra)", "infra_bottleneck", 250),
+            "flash_crowd": ("🔵 Inject Flash Crowd (Legit)", "flash_crowd", 300),
+            "unseen_mmtc_storm": ("🟣 Inject Unknown IoT Storm (Abstain)", "unseen_mmtc_storm", 250),
+            "normal": ("🟢 Normal Baseline (No Event)", "normal", 200),
         }
 
-        for scen_key, (label, scen_val) in scenario_buttons.items():
+        for scen_key, (label, scen_val, jump_tick) in scenario_buttons.items():
             if st.button(label, use_container_width=True):
-                reset_simulation(scen_val, chosen_ctrl, selected_seed)
+                reset_simulation(scen_val, chosen_ctrl, selected_seed, start_ticks=jump_tick)
                 st.rerun()
 
         st.divider()
-        st.subheader("⏩ Step Controls")
-        btn_c1, btn_c2, btn_c3 = st.columns(3)
+        st.subheader("⏩ Step & Navigation Controls")
+        btn_c1, btn_c2 = st.columns(2)
         with btn_c1:
-            if st.button("+1s", use_container_width=True):
-                step_sim(1)
-        with btn_c2:
-            if st.button("+10s", use_container_width=True):
+            if st.button("➕ Step +10s", use_container_width=True):
                 step_sim(10)
-        with btn_c3:
-            if st.button("+50s", use_container_width=True):
+                st.rerun()
+        with btn_c2:
+            if st.button("⏩ Step +50s", use_container_width=True):
                 step_sim(50)
+                st.rerun()
 
-        if st.button("🔄 Reset Current Run", use_container_width=True):
-            reset_simulation(st.session_state.scenario, chosen_ctrl, selected_seed)
+        if st.button("🏁 Run Full 600s Run", use_container_width=True):
+            run_full_scenario()
+            st.rerun()
+
+        if st.button("🔄 Reset to 0s (Start of Run)", use_container_width=True):
+            reset_simulation(st.session_state.scenario, chosen_ctrl, selected_seed, start_ticks=0)
             st.rerun()
 
     # --- MAIN CONTENT TABS ---
@@ -197,9 +220,30 @@ def main() -> None:
     sim: Simulator = st.session_state.sim
     ctrl: BaseController = st.session_state.controller
     history = sim.history
+    current_scenario = st.session_state.scenario
+
+    scenario_labels_map = {
+        "normal": ("Normal Baseline Traffic", "No anomalous event injected. All slices operate at baseline."),
+        "embb_surge": ("eMBB Bandwidth Demand Surge", "eMBB demand jumps to 70% at 200s, causing cross-slice buffer contention on URLLC."),
+        "ddos_like": ("DDoS-Like Flood Attack", "Malicious request flood jumps to 6200 req/s with abnormal packet pattern ratio (0.88)."),
+        "infra_bottleneck": ("Infrastructure Hardware Fault", "Capacity factor drops to 0.60 at 200s, throttling throughput and increasing delay."),
+        "flash_crowd": ("Legitimate Flash Crowd Surge", "Organic user traffic smoothly ramps to 65%. Packet pattern ratio stays strictly normal (<0.15)."),
+        "unseen_mmtc_storm": ("Unseen Massive IoT Storm (Zero-Day)", "IoT registration attempts spike to 350/s. Unmodeled state triggers safety abstention."),
+    }
+    scen_title, scen_desc = scenario_labels_map.get(current_scenario, ("Active Scenario", ""))
 
     with tab_live:
-        # 1. LIVE STATUS METRICS BAR
+        # 1. SCENARIO BANNER
+        event_start = config.time.event_start_tick
+        event_end = event_start + config.time.event_duration_ticks
+        is_in_event_window = (event_start <= sim.current_tick <= event_end) and current_scenario != "normal"
+        
+        status_bg = "#3d1414" if is_in_event_window else "#142d14"
+        event_badge = f"🔥 EVENT ACTIVE (Window: {event_start}s – {event_end}s)" if is_in_event_window else ("🟢 PRE-EVENT / BASELINE" if sim.current_tick < event_start else "✅ POST-EVENT RECOVERY")
+        
+        st.info(f"📍 **Active Scenario**: **{scen_title}** | **Status**: {event_badge} | **Active Controller**: `{controller_options[st.session_state.controller_id]}`\n\n_{scen_desc}_")
+
+        # 2. LIVE STATUS METRICS BAR
         current_tick = sim.current_tick
         total_ticks = config.time.run_length_ticks
         
@@ -216,111 +260,115 @@ def main() -> None:
             is_breaching = False
 
         m1, m2, m3, m4, m5 = st.columns(5)
-        m1.metric("⏱️ Sim Time", f"{current_tick}s / {total_ticks}s")
+        m1.metric("⏱️ Simulation Time", f"{current_tick}s / {total_ticks}s")
         m2.metric(
             "⚡ URLLC Latency",
             f"{lat_val:.1f} ms",
-            delta=f"SLA: <=10ms",
+            delta=f"SLA Target: <=10ms",
             delta_color="normal" if lat_val <= 10.0 else "inverse",
         )
         m3.metric(
             "📉 URLLC Loss",
             f"{loss_val:.2f} %",
-            delta=f"SLA: <=1.0%",
+            delta=f"SLA Target: <=1.0%",
             delta_color="normal" if loss_val <= 1.0 else "inverse",
         )
-        m4.metric("📊 eMBB Served", f"{embb_val:.1f} %", f"Alloc: {alloc_e}%")
-        m5.metric("🎯 URLLC Alloc", f"{alloc_u:.1f} %", f"Floor: 25%")
+        m4.metric("📊 eMBB Served Load", f"{embb_val:.1f} %", f"Alloc: {alloc_e:.1f}%")
+        m5.metric("🎯 URLLC Capacity", f"{alloc_u:.1f} %", f"Min Floor: 25%")
 
-        # 2. STATUS BANNER
+        # 3. STATUS BANNER
         latest_dec = ctrl.latest_decision
         if latest_dec and latest_dec.is_incident:
             if latest_dec.abstained:
-                st.error(f"🛑 **SAFETY ABSTENTION**: Confidence low or novel event signature. Escalated to human operators. (Tick {current_tick}s)")
+                st.error(f"🛑 **SAFETY ABSTENTION ACTIVE (Tick {current_tick}s)**: Diagnosis confidence below safety threshold or unmodeled anomaly signature (`{latest_dec.diagnosis.cause if latest_dec.diagnosis else 'unknown'}`). Escalated to human operator without automated modification.")
             elif latest_dec.action_applied:
-                st.success(f"✅ **ACTION APPLIED**: {latest_dec.proposed_action.action} ({latest_dec.proposed_action.params}) passed Policy & Digital Twin Pre-Check.")
+                st.success(f"✅ **ACTION APPLIED (Tick {latest_dec.tick}s)**: `{latest_dec.proposed_action.action}` ({latest_dec.proposed_action.params}) passed Policy Validation and Digital Twin Pre-Check. SLA Restored!")
             else:
-                st.warning(f"⚠️ **INCIDENT DETECTED**: Monitoring / Cooldown active.")
+                st.warning(f"⚠️ **INCIDENT DETECTED (Tick {current_tick}s)**: Incident active. Cooldown or monitoring in progress.")
         else:
             st.info("🟢 **NORMAL OPERATION**: Telemetry within healthy parameters.")
 
-        # 3. LIVE CHARTS
+        # 4. LIVE TELEMETRY CHARTS
         if history:
             df_hist = pd.DataFrame([r.to_dict() for r in history])
             
             c_left, c_right = st.columns(2)
             with c_left:
-                st.markdown("#### ⚡ URLLC Latency & SLA Target")
+                st.markdown("#### ⚡ URLLC Latency (ms) vs. 10ms SLA Target")
                 chart_lat = df_hist[["t", "urllc_latency_ms"]].copy()
                 chart_lat["SLA_Limit_10ms"] = config.sla.urllc_max_latency_ms
                 st.line_chart(chart_lat.set_index("t"), color=["#d95f02", "#e41a1c"])
 
-                st.markdown("#### 🍰 Slice Allocations (%)")
+                st.markdown("#### 🍰 Slice Dynamic Allocations (%)")
                 st.line_chart(df_hist[["t", "alloc_embb", "alloc_urllc", "alloc_mmtc"]].set_index("t"))
 
             with c_right:
-                st.markdown("#### 📉 Packet Loss & Throughput")
+                st.markdown("#### 📉 Packet Loss (%) & 1.0% SLA Target")
                 chart_loss = df_hist[["t", "urllc_loss_pct"]].copy()
                 chart_loss["Loss_SLA_1pct"] = config.sla.urllc_max_loss_pct
                 st.line_chart(chart_loss.set_index("t"), color=["#7570b3", "#e41a1c"])
 
-                st.markdown("#### 🔍 Pattern Anomaly Ratio & Request Rate")
+                st.markdown("#### 🔍 Pattern Anomaly Ratio (DDoS vs Flash Crowd)")
                 st.line_chart(df_hist[["t", "pattern_anomaly_ratio"]].set_index("t"), color=["#1b9e77"])
         else:
-            st.info("Click **+10s** or **+50s** in the sidebar to run telemetry.")
+            st.info("Simulation at 0s. Click **➕ Step +10s** or **⏩ Step +50s** in the sidebar to advance telemetry.")
 
-        # 4. SAFETY PRE-CHECK & DECISION PANEL
+        # 5. SAFETY PRE-CHECK & DECISION PANEL
         st.divider()
-        st.subheader("🛡️ Safety Pre-Check & Explainability Log")
+        st.subheader("🛡️ Safety Pre-Check & Decision Explainability Panel")
         
         p_col1, p_col2 = st.columns([1, 1])
         with p_col1:
-            st.markdown("##### 🩺 Latest Causal Diagnosis")
-            if latest_dec and latest_dec.diagnosis:
-                diag = latest_dec.diagnosis
+            st.markdown("##### 🩺 Causal Diagnosis & Evidence")
+            # Find recent diagnosis if available
+            recent_diag_dec = next((d for d in reversed(ctrl.decision_log) if d.diagnosis is not None), latest_dec)
+            if recent_diag_dec and recent_diag_dec.diagnosis:
+                diag = recent_diag_dec.diagnosis
                 st.write(f"**Diagnosed Cause:** `{diag.cause}`")
-                st.write(f"**Confidence:** `{diag.confidence*100:.1f}%`")
-                st.write("**Evaluated Evidence:**")
+                st.write(f"**Confidence:** `{diag.confidence*100:.1f}%` (Abstain Threshold: 60%)")
+                st.write("**Evaluated Evidence Propositions:**")
                 for ev in diag.evidence_details[:4]:
                     icon = "✅" if ev.is_satisfied else "❌"
                     st.write(f"{icon} {ev.description} (Observed: `{ev.observed_value:.1f}`)")
             else:
-                st.write("No active anomaly diagnosed.")
+                st.write("No active anomaly diagnosed. All evidence within normal operating bands.")
 
         with p_col2:
-            st.markdown("##### 🔮 Digital Twin Pre-Check Audit")
-            if latest_dec and latest_dec.twin_prediction:
-                twin_p = latest_dec.twin_prediction
+            st.markdown("##### 🔮 Digital Twin Pre-Check Evaluation")
+            recent_twin_dec = next((d for d in reversed(ctrl.decision_log) if d.twin_prediction is not None), latest_dec)
+            if recent_twin_dec and recent_twin_dec.twin_prediction:
+                twin_p = recent_twin_dec.twin_prediction
                 st.write(f"**Tested Action:** `{twin_p.candidate_action.action}` ({twin_p.candidate_action.params})")
-                st.write(f"**Predicted URLLC Latency:** `{twin_p.predicted_urllc_latency_ms:.2f} ms` (SLA: <=10ms)")
+                st.write(f"**Predicted URLLC Latency:** `{twin_p.predicted_urllc_latency_ms:.2f} ms` (SLA: <=10.0ms)")
                 st.write(f"**Predicted URLLC Loss:** `{twin_p.predicted_urllc_loss_pct:.2f} %` (SLA: <=1.0%)")
-                st.write(f"**Pre-Check Result:** {'✅ PASSED (SAFE)' if twin_p.is_safe else '❌ REJECTED (UNSAFE)'}")
+                st.write(f"**Policy Validator:** {'✅ PASSED (Within bounds)' if recent_twin_dec.validation and recent_twin_dec.validation.is_valid else '❌ REJECTED'}")
+                st.write(f"**Pre-Check Result:** {'✅ PASSED & APPLIED' if twin_p.is_safe else '❌ REJECTED (Unsafe for SLA)'}")
             else:
-                st.write("Digital Twin Pre-Check idle.")
+                st.write("Digital Twin Pre-Check idle (no pending action candidate).")
 
         if latest_dec:
             st.text_area("📝 Plain-Language Decision Explanation", value=latest_dec.explanation, height=110)
 
-        # 5. RECENT DECISION LOG
+        # 6. RECENT DECISION LOG
         if ctrl.decision_log:
-            with st.expander("📋 View Full Decision Log Table", expanded=False):
+            with st.expander("📋 View Full Decision Log Table", expanded=True):
                 log_data = []
                 for d in ctrl.decision_log:
                     log_data.append({
-                        "Tick": d.tick,
-                        "Incident": d.is_incident,
+                        "Tick (s)": d.tick,
+                        "Incident": "⚠️ YES" if d.is_incident else "No",
                         "Diagnosis": d.diagnosis.cause if d.diagnosis else "none",
                         "Confidence": f"{d.diagnosis.confidence*100:.1f}%" if d.diagnosis else "-",
-                        "Action": d.proposed_action.action,
-                        "Params": str(d.proposed_action.params),
-                        "Twin Predicted Lat": f"{d.twin_prediction.predicted_urllc_latency_ms:.1f}ms" if d.twin_prediction else "-",
-                        "Applied": d.action_applied,
-                        "Abstained": d.abstained,
+                        "Proposed Action": d.proposed_action.action,
+                        "Parameters": str(d.proposed_action.params),
+                        "Twin Pred Latency": f"{d.twin_prediction.predicted_urllc_latency_ms:.2f}ms" if d.twin_prediction else "-",
+                        "Applied": "✅ YES" if d.action_applied else "No",
+                        "Abstained": "🛑 ABSTAINED" if d.abstained else "No",
                     })
-                st.dataframe(pd.DataFrame(log_data).tail(20), use_container_width=True)
+                st.dataframe(pd.DataFrame(log_data).tail(15), use_container_width=True)
 
     with tab_bench:
-        st.subheader("📊 Empirical Evaluation Results (30 Independent Seeds)")
+        st.subheader("📊 Multi-Seed Empirical Evaluation Results (30 Independent Seeds)")
         summary_csv = Path("results/summary.csv")
         
         if summary_csv.exists():
