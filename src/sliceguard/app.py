@@ -141,13 +141,9 @@ def main() -> None:
     config = load_config()
     init_session_state(config)
 
-    # --- TOP HEADER & SIMULATION BADGE ---
-    header_col1, header_col2 = st.columns([3, 1])
-    with header_col1:
-        st.title("SliceGuard-Lite: Safety-First 5G Slice Assurance")
-        st.caption("Simulation-Based Autonomous Assurance with Predictive Digital Twin Pre-Checking and Abstention")
-    with header_col2:
-        st.warning("[SIMULATION PROTOTYPE]\n\nProof-of-Concept for Nokia Shark Tank (AI in Telecom)")
+    # --- TOP HEADER ---
+    st.title("SliceGuard-Lite: Safety-First 5G Slice Assurance")
+    st.caption("Autonomous 5G Network Slice Assurance with Predictive Digital Twin Pre-Checking and Abstention")
 
     # --- SIDEBAR CONTROLS ---
     with st.sidebar:

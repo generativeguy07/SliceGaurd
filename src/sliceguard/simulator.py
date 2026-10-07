@@ -45,26 +45,35 @@ class KPIRow:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert entire row including evaluation labels to dictionary."""
-        return asdict(self)
+        return {
+            "t": self.t,
+            "scenario": self.scenario,
+            "event_label": self.event_label,
+            "is_attack": self.is_attack,
+            "alloc_embb": self.alloc_embb,
+            "alloc_urllc": self.alloc_urllc,
+            "alloc_mmtc": self.alloc_mmtc,
+            "embb_demand_pct": self.embb_demand_pct,
+            "embb_served_pct": self.embb_served_pct,
+            "embb_throughput_mbps": self.embb_throughput_mbps,
+            "embb_latency_ms": self.embb_latency_ms,
+            "urllc_latency_ms": self.urllc_latency_ms,
+            "urllc_loss_pct": self.urllc_loss_pct,
+            "urllc_jitter_ms": self.urllc_jitter_ms,
+            "mmtc_devices": self.mmtc_devices,
+            "mmtc_reg_failures": self.mmtc_reg_failures,
+            "cpu_pct": self.cpu_pct,
+            "shared_util_pct": self.shared_util_pct,
+            "req_rate_total": self.req_rate_total,
+            "pattern_anomaly_ratio": self.pattern_anomaly_ratio,
+        }
 
     def to_observable_dict(self) -> Dict[str, Any]:
         """Return only observable telemetry features (strictly no ground-truth labels)."""
-        d = asdict(self)
+        d = self.to_dict()
         d.pop("event_label", None)
         d.pop("is_attack", None)
         return d
-
-    def __getitem__(self, key: str) -> Any:
-        return getattr(self, key)
-
-    def items(self):
-        return self.to_dict().items()
-
-    def keys(self):
-        return self.to_dict().keys()
-
-    def values(self):
-        return self.to_dict().values()
 
 
 class Simulator:
