@@ -176,6 +176,8 @@ def main() -> None:
             "ddos_like": ("Inject DDoS Attack (Security Anomaly)", "ddos_like", 250),
             "infra_bottleneck": ("Inject Hardware Fault (Capacity Drop)", "infra_bottleneck", 250),
             "flash_crowd": ("Inject Flash Crowd (Legitimate Traffic)", "flash_crowd", 300),
+            "overlapping": ("Inject Compound Fault (Surge + Hardware Drop)", "overlapping", 250),
+            "noisy_kpis": ("Inject Noisy Telemetry (Sensor Dropouts)", "noisy_kpis", 250),
             "unseen_mmtc_storm": ("Inject Unknown IoT Storm (Safety Abstention)", "unseen_mmtc_storm", 250),
             "normal": ("Normal Baseline (No Fault)", "normal", 200),
         }
@@ -223,6 +225,8 @@ def main() -> None:
         "ddos_like": ("DDoS-Like Flood Attack", "Malicious request flood jumps to 6200 req/s with abnormal packet pattern ratio (0.88)."),
         "infra_bottleneck": ("Infrastructure Hardware Fault", "Capacity factor drops to 0.60 at 200s, throttling throughput and increasing delay."),
         "flash_crowd": ("Legitimate Flash Crowd Surge", "Organic user traffic smoothly ramps to 65%. Packet pattern ratio stays strictly normal (<0.15)."),
+        "overlapping": ("Compound Multi-Incident Event", "Simultaneous eMBB bandwidth surge and secondary hardware capacity drop (0.70)."),
+        "noisy_kpis": ("High-Noise Telemetry Stream", "eMBB surge with 8% sensor noise and 5% random packet measurement dropouts."),
         "unseen_mmtc_storm": ("Unseen Massive IoT Storm (Zero-Day)", "IoT registration attempts spike to 350/s. Unmodeled state triggers safety abstention."),
     }
     scen_title, scen_desc = scenario_labels_map.get(current_scenario, ("Active Scenario", ""))
